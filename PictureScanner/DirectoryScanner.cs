@@ -19,7 +19,7 @@ namespace PictureScanner
 			this.files = new List<DataFile>();
 		}
 
-		public void Scan()
+		public Guid Scan()
 		{
 			var searchedFiles = Directory.EnumerateFiles(this.path, "*.*", SearchOption.AllDirectories);
 
@@ -37,6 +37,15 @@ namespace PictureScanner
 				context.SaveChanges();
 			}
 
+			return scanId;
+		}
+
+		public static Guid LastScanId()
+		{
+			using (var context = new DatabaseContext())
+			{
+				return context.SearchFiles.OrderByDescending(item => item.Id).First().ScanId;
+			}
 		}
 
 	}

@@ -55,9 +55,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComparisonPair.cs" />
+    <Compile Include="ConfirmationService.cs" />
     <Compile Include="DatabaseContext.cs" />
     <Compile Include="DataFile.cs" />
     <Compile Include="DirectoryScanner.cs" />
+    <Compile Include="DuplicateFile.cs" />
+    <Compile Include="DuplicationOwner.cs" />
+    <Compile Include="DuplicationScanner.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +81,26 @@
     <Compile Include="Migrations\201508191542082_AddSize.Designer.cs">
       <DependentUpon>201508191542082_AddSize.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201508241801105_DuplicationOwner.cs" />
+    <Compile Include="Migrations\201508241801105_DuplicationOwner.Designer.cs">
+      <DependentUpon>201508241801105_DuplicationOwner.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201508241858012_DuplicateFiles.cs" />
+    <Compile Include="Migrations\201508241858012_DuplicateFiles.Designer.cs">
+      <DependentUpon>201508241858012_DuplicateFiles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201508241927551_DuplicateFiles1.cs" />
+    <Compile Include="Migrations\201508241927551_DuplicateFiles1.Designer.cs">
+      <DependentUpon>201508241927551_DuplicateFiles1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201508241935176_Keys.cs" />
+    <Compile Include="Migrations\201508241935176_Keys.Designer.cs">
+      <DependentUpon>201508241935176_Keys.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201508241957389_Not duplicate.cs" />
+    <Compile Include="Migrations\201508241957389_Not duplicate.Designer.cs">
+      <DependentUpon>201508241957389_Not duplicate.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -90,6 +115,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201508191542082_AddSize.resx">
       <DependentUpon>201508191542082_AddSize.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201508241801105_DuplicationOwner.resx">
+      <DependentUpon>201508241801105_DuplicationOwner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201508241858012_DuplicateFiles.resx">
+      <DependentUpon>201508241858012_DuplicateFiles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201508241927551_DuplicateFiles1.resx">
+      <DependentUpon>201508241927551_DuplicateFiles1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201508241935176_Keys.resx">
+      <DependentUpon>201508241935176_Keys.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201508241957389_Not duplicate.resx">
+      <DependentUpon>201508241957389_Not duplicate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
