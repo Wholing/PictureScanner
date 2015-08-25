@@ -6,47 +6,61 @@ using System.Threading.Tasks;
 
 namespace PictureScanner
 {
-	using System.IO;
+    using System.IO;
 
-	internal class DirectoryScanner
-	{
-		private readonly string path;
+    internal class DirectoryScanner
+    {
+        private readonly string path;
 
-		private List<DataFile> files;
-		public DirectoryScanner(string path)
-		{
-			this.path = path;
-			this.files = new List<DataFile>();
-		}
+        private List<DataFile> files;
+        public DirectoryScanner(string path)
+        {
+            this.path = path;
+            this.files = new List<DataFile>();
+        }
 
-		public Guid Scan()
-		{
-			var searchedFiles = Directory.EnumerateFiles(this.path, "*.*", SearchOption.AllDirectories);
+        public Guid Scan()
+        {
+            var searchedFiles = Directory.EnumerateFiles(this.path, "*.*", SearchOption.AllDirectories);
 
-			var scanId = Guid.NewGuid();
+            var scanId = Guid.NewGuid();
 
-			foreach (var file in searchedFiles)
-			{
-				var info = new FileInfo(file);
-				this.files.Add(new DataFile { ScanId = scanId, FileNameFull = file, Size = info.Length });
-			}
+            foreach (var file in searchedFiles)
+            {
+                if (FileShouldBeExcluded(file)) continue;
+                var info = new FileInfo(file);
+                this.files.Add(new DataFile { ScanId = scanId, FileNameFull = file, Size = info.Length });
+            }
 
-			using (var context = new DatabaseContext())
-			{
-				context.SearchFiles.AddRange(this.files);
-				context.SaveChanges();
-			}
+            using (var context = new DatabaseContext())
+            {
+                var skip = 0;
+                var toSave = this.files.Take(100);
+                while (toSave != null && toSave.Count() > 0)
+                {
+                    context.SearchFiles.AddRange(toSave);
+                    context.SaveChanges();
+                    skip = skip + 100;
+                    toSave = this.files.Skip(skip).Take(100);
+                }
+            }
 
-			return scanId;
-		}
+            return scanId;
+        }
 
-		public static Guid LastScanId()
-		{
-			using (var context = new DatabaseContext())
-			{
-				return context.SearchFiles.OrderByDescending(item => item.Id).First().ScanId;
-			}
-		}
+        public static Guid LastScanId()
+        {
+            using (var context = new DatabaseContext())
+            {
+                return context.SearchFiles.OrderByDescending(item => item.Id).First().ScanId;
+            }
+        }
 
-	}
+        private static bool FileShouldBeExcluded(string filename)
+        {
+            return (Path.GetFileName(filename).Equals("Thumbs.db", StringComparison.OrdinalIgnoreCase)) 
+                || (Path.GetExtension(filename).Equals(".zip", StringComparison.OrdinalIgnoreCase) 
+                || (Path.GetExtension(filename).Equals(".MPG", StringComparison.OrdinalIgnoreCase)));
+        }
+    }
 }

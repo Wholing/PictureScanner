@@ -11,8 +11,10 @@ namespace PictureScanner
 		private readonly Guid scanId;
 
 		private IEnumerable<ScanState> state;
+        private int ownerCounter = 0;
+        private int duplicateCounter = 0;
 
-		public DuplicationScanner(Guid scanId)
+        public DuplicationScanner(Guid scanId)
 		{
 			this.scanId = scanId;
 		}
@@ -37,28 +39,59 @@ namespace PictureScanner
 			}
 
 		}
+        private void PerformScan()
+        {
+            while (this.state.Any(item => !item.Used))
+            {
+                PerformScanInternal();
+            }
+        }
 
-		private void PerformScan()
-		{
-			ScanState suspect;
+        private void PerformScanInternal()
+        {
+            Parallel.ForEach(this.state, (suspect) =>
+            {
+                if (!suspect.TrySetUsed()) return;
+                ScanState owner;
+                if (this.TryFindOwner(suspect, out owner))
+                {
+                    owner.Add(suspect);
+                    ownerCounter++;
+                }
+                else
+                {
+                    suspect.Add(suspect);
+                    duplicateCounter++;
+                }
+            });
 
-			while ((suspect = this.state.FirstOrDefault(item => !item.Used)) != null)
-			{
-				if (!suspect.TrySetUsed()) continue;
-				ScanState owner;
-				if (this.TryFindOwner(suspect, out owner))
-				{
-					owner.Add(suspect);
-				}
-				else
-				{
-					suspect.Add(suspect);
-				}
-			}
+        }
 
-		}
 
-		private bool TryFindOwner(ScanState suspect, out ScanState owner)
+        //private void PerformScan()
+        //{
+        //	ScanState suspect;
+        //          int ownerCounter = 0;
+        //          int duplicateCounter = 0;
+        //	while ((suspect = this.state.FirstOrDefault(item => !item.Used)) != null)
+        //	{
+        //		if (!suspect.TrySetUsed()) continue;
+        //		ScanState owner;
+        //		if (this.TryFindOwner(suspect, out owner))
+        //		{
+        //			owner.Add(suspect);
+        //                  ownerCounter++;
+        //              }
+        //		else
+        //		{
+        //			suspect.Add(suspect);
+        //                  duplicateCounter++;
+        //              }
+        //	}
+
+        //}
+
+        private bool TryFindOwner(ScanState suspect, out ScanState owner)
 		{
 			owner = this.state.FirstOrDefault(item => item.DataFile.Id != suspect.DataFile.Id && item.Used && item.DataFile.Size == suspect.DataFile.Size);
 			return owner != null;
