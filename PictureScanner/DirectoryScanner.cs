@@ -29,7 +29,8 @@ namespace PictureScanner
             {
                 if (FileShouldBeExcluded(file)) continue;
                 var info = new FileInfo(file);
-                this.files.Add(new DataFile { ScanId = scanId, FileNameFull = file, Size = info.Length });
+                var hash = FileHashCreator.GetMD5Hash(file);
+                this.files.Add(new DataFile { ScanId = scanId, FileNameFull = file, Size = info.Length, Hash = hash });
             }
 
             using (var context = new DatabaseContext())

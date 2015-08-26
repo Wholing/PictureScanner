@@ -6,39 +6,39 @@ using System.Threading.Tasks;
 
 namespace PictureScanner
 {
-	internal class DuplicationScanner
-	{
-		private readonly Guid scanId;
+    internal class DuplicationScanner
+    {
+        private readonly Guid scanId;
 
-		private IEnumerable<ScanState> state;
+        private IEnumerable<ScanState> state;
         private int ownerCounter = 0;
         private int duplicateCounter = 0;
 
         public DuplicationScanner(Guid scanId)
-		{
-			this.scanId = scanId;
-		}
+        {
+            this.scanId = scanId;
+        }
 
-		public void Scan()
-		{
-			this.BuildInitialState();
+        public void Scan()
+        {
+            this.BuildInitialState();
 
-			this.ApplyCrudeSortorder();
+            this.ApplyCrudeSortorder();
 
-			this.PerformScan();
+            this.PerformScan();
 
-			this.PersistScan();
-		}
+            this.PersistScan();
+        }
 
-		private void PersistScan()
-		{
-			using (var context = new DatabaseContext())
-			{
-				context.DuplicationOwners.AddRange(this.state.Where(suspect => suspect.Owner != null).Select(item => item.Owner));
-				context.SaveChanges();
-			}
+        private void PersistScan()
+        {
+            using (var context = new DatabaseContext())
+            {
+                context.DuplicationOwners.AddRange(this.state.Where(suspect => suspect.Owner != null).Select(item => item.Owner));
+                context.SaveChanges();
+            }
 
-		}
+        }
         private void PerformScan()
         {
             while (this.state.Any(item => !item.Used))
@@ -92,63 +92,66 @@ namespace PictureScanner
         //}
 
         private bool TryFindOwner(ScanState suspect, out ScanState owner)
-		{
-			owner = this.state.FirstOrDefault(item => item.DataFile.Id != suspect.DataFile.Id && item.Used && item.DataFile.Size == suspect.DataFile.Size);
-			return owner != null;
-		}
+        {
+            owner = state.FirstOrDefault(item => item.DataFile.Id != suspect.DataFile.Id 
+                                                    && item.Used 
+                                                    && item.DataFile.Size == suspect.DataFile.Size 
+                                                    && item.DataFile.Hash == suspect.DataFile.Hash);
+            return owner != null;
+        }
 
-		private void BuildInitialState()
-		{
-			using (var context = new DatabaseContext())
-			{
-				this.state = context.SearchFiles.Where(item => item.ScanId == this.scanId).Select(res => new ScanState { DataFile = res }).ToList();
-			}
-		}
+        private void BuildInitialState()
+        {
+            using (var context = new DatabaseContext())
+            {
+                this.state = context.SearchFiles.Where(item => item.ScanId == this.scanId).Select(res => new ScanState { DataFile = res }).ToList();
+            }
+        }
 
-		private void ApplyCrudeSortorder()
-		{
-			this.state = this.state.OrderBy(item => item.DataFile.Size);
-		}
+        private void ApplyCrudeSortorder()
+        {
+            this.state = this.state.OrderBy(item => item.DataFile.Size);
+        }
 
-		private class ScanState
-		{
-			private readonly object syncLock = new object();
+        private class ScanState
+        {
+            private readonly object syncLock = new object();
 
-			public ScanState()
-			{
-			}
+            public ScanState()
+            {
+            }
 
-			public DataFile DataFile { get; set; }
+            public DataFile DataFile { get; set; }
 
-			public DuplicationOwner Owner { get; private set; }
+            public DuplicationOwner Owner { get; private set; }
 
-			public void Add(ScanState state)
-			{
-				lock (this.syncLock)
-				{
-					if (this.Owner == null)
-					{
-						this.Owner = new DuplicationOwner { Owner = state.DataFile, ScanId = state.DataFile.ScanId };
-					}
-					else
-					{
-						this.Owner.DuplicateFiles.Add(new DuplicateFile() { ScanId = state.DataFile.ScanId, DataFile = state.DataFile });
-					}
-				}
-			}
+            public void Add(ScanState state)
+            {
+                lock (this.syncLock)
+                {
+                    if (this.Owner == null)
+                    {
+                        this.Owner = new DuplicationOwner { Owner = state.DataFile, ScanId = state.DataFile.ScanId };
+                    }
+                    else
+                    {
+                        this.Owner.DuplicateFiles.Add(new DuplicateFile() { ScanId = state.DataFile.ScanId, DataFile = state.DataFile });
+                    }
+                }
+            }
 
-			public bool Used { get; private set; }
+            public bool Used { get; private set; }
 
-			public bool TrySetUsed()
-			{
-				lock (this.syncLock)
-				{
-					if (this.Used) return false;
-					this.Used = true;
-					return true;
-				}
-			}
-		}
+            public bool TrySetUsed()
+            {
+                lock (this.syncLock)
+                {
+                    if (this.Used) return false;
+                    this.Used = true;
+                    return true;
+                }
+            }
+        }
 
-	}
+    }
 }

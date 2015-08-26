@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.ComponentModel.DataAnnotations;
-	using System.IO;
 
 	internal class DataFile
 	{
@@ -15,5 +14,7 @@
 		public string FileNameFull { get; set; }
 
 		public long Size { get; set; }
+
+        public string Hash { get; set; }
 	}
 }

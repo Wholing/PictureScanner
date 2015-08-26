@@ -63,6 +63,7 @@
     <Compile Include="DuplicateFile.cs" />
     <Compile Include="DuplicationOwner.cs" />
     <Compile Include="DuplicationScanner.cs" />
+    <Compile Include="FileHashCreator.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -101,6 +102,10 @@
     <Compile Include="Migrations\201508241957389_Not duplicate.Designer.cs">
       <DependentUpon>201508241957389_Not duplicate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201508261904060_Hash.cs" />
+    <Compile Include="Migrations\201508261904060_Hash.Designer.cs">
+      <DependentUpon>201508261904060_Hash.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -130,6 +135,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201508241957389_Not duplicate.resx">
       <DependentUpon>201508241957389_Not duplicate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201508261904060_Hash.resx">
+      <DependentUpon>201508261904060_Hash.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
