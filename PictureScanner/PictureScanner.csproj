@@ -70,6 +70,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="IProgress.cs" />
     <Compile Include="Migrations\201508191531444_InitialCreate.cs" />
     <Compile Include="Migrations\201508191531444_InitialCreate.Designer.cs">
       <DependentUpon>201508191531444_InitialCreate.cs</DependentUpon>
@@ -109,6 +110,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScanResult.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

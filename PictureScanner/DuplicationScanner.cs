@@ -13,13 +13,20 @@ namespace PictureScanner
         private IEnumerable<ScanState> state;
         private int ownerCounter = 0;
         private int duplicateCounter = 0;
+        private int multiprocessed = 0;
+        private int count = 0;
 
         public DuplicationScanner(Guid scanId)
         {
             this.scanId = scanId;
         }
 
-        public void Scan()
+        public async Task<ScanResult> ScanAsync()
+        {
+            return await Task.Run(() => { return Scan(); });
+        }
+
+        public ScanResult Scan()
         {
             this.BuildInitialState();
 
@@ -28,6 +35,8 @@ namespace PictureScanner
             this.PerformScan();
 
             this.PersistScan();
+
+            return new ScanResult { Count = count, DuplicationCount = duplicateCounter, UniqueCount = ownerCounter, Multiprocessed = multiprocessed };
         }
 
         private void PersistScan()
@@ -39,6 +48,7 @@ namespace PictureScanner
             }
 
         }
+
         private void PerformScan()
         {
             while (this.state.Any(item => !item.Used))
@@ -51,45 +61,26 @@ namespace PictureScanner
         {
             Parallel.ForEach(this.state, (suspect) =>
             {
-                if (!suspect.TrySetUsed()) return;
+                if (!suspect.TrySetUsed())
+                {
+                    multiprocessed++;
+                    return;
+                }
+                count++;
                 ScanState owner;
                 if (this.TryFindOwner(suspect, out owner))
                 {
                     owner.Add(suspect);
-                    ownerCounter++;
+                    duplicateCounter++;
                 }
                 else
                 {
                     suspect.Add(suspect);
-                    duplicateCounter++;
+                    ownerCounter++;
                 }
             });
 
         }
-
-
-        //private void PerformScan()
-        //{
-        //	ScanState suspect;
-        //          int ownerCounter = 0;
-        //          int duplicateCounter = 0;
-        //	while ((suspect = this.state.FirstOrDefault(item => !item.Used)) != null)
-        //	{
-        //		if (!suspect.TrySetUsed()) continue;
-        //		ScanState owner;
-        //		if (this.TryFindOwner(suspect, out owner))
-        //		{
-        //			owner.Add(suspect);
-        //                  ownerCounter++;
-        //              }
-        //		else
-        //		{
-        //			suspect.Add(suspect);
-        //                  duplicateCounter++;
-        //              }
-        //	}
-
-        //}
 
         private bool TryFindOwner(ScanState suspect, out ScanState owner)
         {

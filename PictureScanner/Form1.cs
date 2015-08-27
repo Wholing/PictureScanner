@@ -13,6 +13,7 @@ namespace PictureScanner
     public partial class Form1 : Form
     {
         private ConfirmationService comparisonService;
+        private IProgress progress;
 
         private ComparisonPair currentComparison;
 
@@ -21,15 +22,26 @@ namespace PictureScanner
             InitializeComponent();
         }
 
-        private void btnGo_Click(object sender, EventArgs e)
+        private async void btnGo_Click(object sender, EventArgs e)
         {
             btnGo.Enabled = false;
-            var scanner = new DirectoryScanner(txtPath.Text);
-            var scanId = scanner.Scan();
-            var dups = new DuplicationScanner(scanId);
-            dups.Scan();
+            labelProgress.Text = string.Empty;
+            labelProgress.Visible = true;
+            timer1.Enabled = true;
 
+            var scanner = new DirectoryScanner(txtPath.Text);
+            progress = scanner;
+            var scanId = await scanner.ScanAsync();
+            var scanId2 = await scanner.HashAsync(scanId);
+            var dups = new DuplicationScanner(scanId);
+            var result = await dups.ScanAsync();
+
+            var message = string.Format("Count: {0}\nUnique:{1}\nDuplicates:{2}\nConflicts:{3}", result.Count, result.UniqueCount, result.DuplicationCount, result.Multiprocessed);
+            MessageBox.Show(message);
+
+            timer1.Enabled = false;
             btnGo.Enabled = true;
+            labelProgress.Visible = false;
         }
 
         private void buttonConfirmMode_Click(object sender, EventArgs e)
@@ -98,5 +110,50 @@ namespace PictureScanner
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            labelProgress.Text = progress.Value.ToString();
+        }
+
+        private async void buttonDups_Click(object sender, EventArgs e)
+        {
+            buttonDups.Enabled = false;
+            labelProgress.Text = string.Empty;
+            labelProgress.Visible = true;
+            timer1.Enabled = true;
+
+            var scanId = DirectoryScanner.LastScanId();
+            var dups = new DuplicationScanner(scanId);
+            var result = await dups.ScanAsync();
+
+            var message = string.Format("Count: {0}\nUnique:{1}\nDuplicates:{2}\nConflicts:{3}", result.Count, result.UniqueCount, result.DuplicationCount, result.Multiprocessed);
+            MessageBox.Show(message);
+
+            timer1.Enabled = false;
+            buttonDups.Enabled = true;
+            labelProgress.Visible = false;
+        }
+
+        private async void buttonHash_Click(object sender, EventArgs e)
+        {
+            buttonHash.Enabled = false;
+            labelProgress.Text = string.Empty;
+            labelProgress.Visible = true;
+            timer1.Enabled = true;
+
+            var scanner = new DirectoryScanner(txtPath.Text);
+            progress = scanner;
+            var scanId = DirectoryScanner.LastScanId();
+            var scanId2 = await scanner.HashAsync(scanId);
+            var dups = new DuplicationScanner(scanId);
+            var result = await dups.ScanAsync();
+
+            var message = string.Format("Count: {0}\nUnique:{1}\nDuplicates:{2}\nConflicts:{3}", result.Count, result.UniqueCount, result.DuplicationCount, result.Multiprocessed);
+            MessageBox.Show(message);
+
+            timer1.Enabled = false;
+            buttonHash.Enabled = true;
+            labelProgress.Visible = false;
+        }
     }
 }
